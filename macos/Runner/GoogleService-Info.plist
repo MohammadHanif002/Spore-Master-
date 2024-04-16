@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBFfZAfvIU0Osn7yx-OWCtZHomR5W5m-s8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>302661394551</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.sporemaster.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>sporebase-4a15a</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sporebase-4a15a.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:302661394551:ios:7ae4544aec7c5b09012672</string>
+</dict>
+</plist>

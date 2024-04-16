@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302661394551",
+    "project_id": "sporebase-4a15a",
+    "storage_bucket": "sporebase-4a15a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302661394551:android:7d0b61a9e352bda3012672",
+        "android_client_info": {
+          "package_name": "com.example.sporemaster"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVFLG6dpTkzjhVH-LXaBt_gJXBYHyqiEs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
