@@ -3,6 +3,7 @@ import 'package:sporemaster/screens/farmer_data_admin.dart';
 import 'package:sporemaster/screens/sprinkling_data_admin.dart';
 import 'package:sporemaster/screens/farmer_login_screen.dart';
 import 'package:sporemaster/screens/profile_screen.dart';
+import 'package:sporemaster/screens/temperature_screen.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   @override

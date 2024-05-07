@@ -1,43 +1,143 @@
 import 'package:flutter/material.dart';
-import 'package:sporemaster/screens/farmer_signup_screen.dart'; // Import file farmer_signup_screen.dart
-import 'package:sporemaster/screens/home_screen.dart'; // Import file home_screen.dart
-import 'package:sporemaster/services/authentication_service.dart'; // Import AuthenticationService
-import 'package:sporemaster/screens/admin_home_screen.dart'; // Import file home_screen.dart
+import 'package:sporemaster/screens/farmer_signup_screen.dart';
+import 'package:sporemaster/screens/home_screen.dart';
+import 'package:sporemaster/services/authentication_service.dart';
+import 'package:sporemaster/screens/admin_home_screen.dart';
 
-class FarmerLoginScreen extends StatelessWidget {
+class FarmerLoginScreen extends StatefulWidget {
   FarmerLoginScreen({Key? key}) : super(key: key);
 
+  @override
+  _FarmerLoginScreenState createState() => _FarmerLoginScreenState();
+}
+
+class _FarmerLoginScreenState extends State<FarmerLoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // Fungsi untuk melakukan login
+  bool _isPasswordHidden = true;
+
   Future<void> signInWithEmailAndPassword(
       String email, String password, BuildContext context) async {
     try {
+      // Validasi email dan password kosong
       if (email.isEmpty || password.isEmpty) {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Peringatan'),
-              content: Text('Mohon lengkapi username dan password.'),
+              title: Column(
+                children: [
+                  Text(
+                    'Peringatan',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.red[600],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  CircleAvatar(
+                    backgroundColor: Colors.red[400],
+                    radius: 30,
+                    child: Icon(
+                      Icons.announcement_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                textAlign: TextAlign.center,
+                'Mohon lengkapi username dan password',
+                style: TextStyle(fontSize: 15),
+              ),
+            );
+          },
+        );
+
+        return;
+      }
+
+      // Lakukan proses login sesuai dengan aturan yang ada
+      // Misalkan, jika email dan password admin sudah ditentukan
+      if (email == 'admin' && password == 'admin123') {
+        // Jika username dan password admin sesuai, arahkan ke AdminHomeScreen
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  Text(
+                    'Login Berhasil',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.green[400],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  CircleAvatar(
+                    backgroundColor: Colors.green[400],
+                    radius: 30,
+                    child: Icon(
+                      Icons.admin_panel_settings_rounded,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                textAlign: TextAlign.center,
+                'Anda berhasil login sebagai admin',
+                style: TextStyle(fontSize: 15),
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdminHomeScreen(),
+                      ),
+                    );
                   },
-                  child: Text('OK'),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                    child: Text(
+                      "OK",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             );
           },
         );
+
         return;
       }
 
-      // Misalkan username dan password admin sudah ditentukan
-      if (email == 'admin' && password == 'admin123') {
-        // Jika username dan password admin sesuai, arahkan ke AdminHomeScreen
+      // Lakukan proses login sesuai dengan aturan yang ada
+      await AuthenticationService().signInWithEmailAndPassword(
+        email,
+        password,
+      );
+
+      // Check apakah pengguna adalah admin atau bukan
+      bool isAdmin = email.contains('@admin.com');
+
+      if (isAdmin) {
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -55,45 +155,16 @@ class FarmerLoginScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return;
-      }
-
-      // Jika bukan admin, lakukan login seperti biasa
-      await AuthenticationService().signInWithEmailAndPassword(
-        email,
-        password,
-      );
-
-      // Check apakah pengguna adalah admin atau bukan
-      // Misalnya, di sini kita menganggap bahwa email admin memiliki pola tertentu
-      bool isAdmin = email.contains('@admin.com');
-
-      if (isAdmin) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Login Berhasil'),
-              content: Text('Anda berhasil login sebagai admin.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            AdminHomeScreen(), // AdminHomeScreen
-                      ),
-                    );
-                  },
-                  child: Text('OK'),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.green),
+                  ),
                 ),
               ],
             );
@@ -104,8 +175,33 @@ class FarmerLoginScreen extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Login Berhasil'),
-              content: Text('Anda berhasil login sebagai pengguna biasa.'),
+              title: Column(
+                children: [
+                  Text(
+                    'Login Berhasil',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.green[400],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  CircleAvatar(
+                    backgroundColor: Colors.green[400],
+                    radius: 30,
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                textAlign: TextAlign.center,
+                'Anda berhasil login sebagai petani',
+                style: TextStyle(fontSize: 15),
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
@@ -117,7 +213,19 @@ class FarmerLoginScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Text('OK'),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                    child: Text(
+                      "OK",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             );
@@ -134,14 +242,50 @@ class FarmerLoginScreen extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Peringatan'),
-            content: Text(errorMessage),
+            title: Column(
+              children: [
+                Text(
+                  'Login gagal',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.red[600],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                CircleAvatar(
+                  backgroundColor: Colors.red[400],
+                  radius: 30,
+                  child: Icon(
+                    Icons.warning_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('OK'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red[600],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                  child: Text(
+                    "OK",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ],
           );
@@ -246,12 +390,13 @@ class FarmerLoginScreen extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.black,
                       ),
-                      obscureText: true, // Hide password
+                      obscureText:
+                          _isPasswordHidden, // Gunakan variabel _isPasswordHidden
                       decoration: InputDecoration(
                         prefixIcon: Icon(
                           Icons.lock,
                           color: Colors.grey,
-                        ), // Icon gembok
+                        ),
                         hintText: 'Password',
                         hintStyle: TextStyle(color: Colors.grey),
                         focusedBorder: OutlineInputBorder(
@@ -264,6 +409,20 @@ class FarmerLoginScreen extends StatelessWidget {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordHidden =
+                                  !_isPasswordHidden; // Toggle nilai variabel
+                            });
+                          },
                         ),
                       ),
                     ),
@@ -281,8 +440,8 @@ class FarmerLoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                       padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                      backgroundColor: Color.fromARGB(255, 3, 123, 3),
+                          EdgeInsets.symmetric(horizontal: 60, vertical: 15),
+                      backgroundColor: Colors.green[600],
                     ),
                     child: Text(
                       'Login',
@@ -292,9 +451,7 @@ class FarmerLoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   SizedBox(height: 10),
-                  // Teks "Belum punya akun?"
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -305,10 +462,9 @@ class FarmerLoginScreen extends StatelessWidget {
                           color: Colors.black54,
                         ),
                       ),
-                      // Tombol "Sign Up Now"
+                      SizedBox(width: 10),
                       TextButton(
                         onPressed: () {
-                          // Navigasi ke halaman FarmerSignupScreen
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -320,7 +476,19 @@ class FarmerLoginScreen extends StatelessWidget {
                           "Sign Up Now",
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.green,
+                            color: Colors.green[400],
+                          ),
+                        ),
+                        style: ButtonStyle(
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
                       ),

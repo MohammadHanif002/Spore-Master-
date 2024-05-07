@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:sporemaster/screens/profile_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   EditProfileScreen({Key? key}) : super(key: key);
@@ -44,12 +45,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() {
         _image = File(pickedFile.path);
       });
-
-      // Upload image to Firebase Storage
-      String imageUrl = await uploadImageToFirebaseStorage(_image);
-
-      // Save image URL to Firestore
-      await _saveDataToFirestore(); // Perbaikan disini
     } else {
       print('Tidak ada gambar yang dipilih.');
     }
@@ -75,7 +70,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  Future<void> _saveDataToFirestore() async {
+  void _handleSaveButtonPressed() async {
+    // Tambahkan pengecekan jika gambar belum dipilih
+    if (_image.path.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Harap pilih gambar terlebih dahulu')),
+      );
+      return;
+    }
+
+    // Upload gambar ke Firebase Storage dan dapatkan URL gambar
+    String imageUrl = await uploadImageToFirebaseStorage(_image);
+
+    // Panggil metode untuk menyimpan data ke Firestore dengan URL gambar
+    await _saveDataToFirestore(imageUrl);
+  }
+
+  Future<void> _saveDataToFirestore(String imageUrl) async {
     // Mendapatkan nilai input dari pengguna
     String email = emailController.text;
     String phone = phoneController.text;
@@ -110,7 +121,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'postalCode': postalCode,
             'age': age,
             'gender': gender,
-            'profileImage': _image.path, // Simpan path gambar ke Firestore
+            'profileImage': imageUrl, // Simpan URL gambar ke Firestore
           });
         } else {
           // Menambahkan dokumen baru ke Firestore
@@ -122,6 +133,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'postalCode': postalCode,
             'age': age,
             'gender': gender,
+            'profileImage': imageUrl, // Simpan URL gambar ke Firestore
           });
         }
 
@@ -130,8 +142,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SnackBar(content: Text('Data berhasil disimpan di Firestore')),
         );
 
-        // Kembali ke halaman sebelumnya
-        Navigator.pop(context);
+        // Mengarahkan pengguna ke halaman ProfileScreen setelah menyimpan perubahan
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
+        );
       }
     } catch (error) {
       // Menampilkan pesan kesalahan jika penyimpanan gagal
@@ -261,6 +276,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                 SizedBox(height: h * 0.03), // Tambahkan jarak di sini
 
+                // Ubah onPressed pada ElevatedButton menjadi _handleSaveButtonPressed
                 Container(
                   width: w * 0.4,
                   decoration: BoxDecoration(
@@ -269,7 +285,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ElevatedButton(
-                    onPressed: _saveDataToFirestore,
+                    onPressed: _handleSaveButtonPressed,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color.fromARGB(
                           255, 3, 123, 3), // Atur warna latar belakang tombol

@@ -3,6 +3,7 @@ import 'package:sporemaster/screens/farmer_login_screen.dart';
 import 'package:sporemaster/screens/profile_screen.dart';
 import 'package:sporemaster/screens/sprinkling_screen.dart';
 import 'package:sporemaster/screens/temperature_screen.dart';
+import 'package:sporemaster/screens/testiot_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -162,6 +163,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 break;
               case 1:
                 // Handle search button tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TestiotScreen()),
+                );
                 break;
               case 2:
                 // Navigate to profile screen

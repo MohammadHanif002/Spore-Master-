@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sporemaster/screens/edit_profile_screen.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
   ProfileScreen({Key? key}) : super(key: key);
@@ -95,10 +96,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: w * 0.15,
                     backgroundColor: Colors.grey[300],
                     backgroundImage: _profileImagePath.isNotEmpty
-                        ? AssetImage(_profileImagePath)
-                        : AssetImage("assets/images/default_profile_image.jpg"),
+                        ? NetworkImage(
+                            _profileImagePath) // Gunakan NetworkImage untuk URL Firestore
+                        : null, // Atur backgroundImage menjadi null jika _profileImagePath kosong
+                    child: _profileImagePath
+                            .isEmpty // Tambahkan child untuk menampilkan ikon kamera jika tidak ada gambar profil
+                        ? Icon(Icons.camera_alt, size: w * 0.1)
+                        : null,
                   ),
-                  SizedBox(height: h * 0.02),
+                  SizedBox(height: h * 0.01),
                   Text(
                     'PETANI',
                     style: TextStyle(
@@ -110,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            SizedBox(height: h * 0.05),
+            SizedBox(height: h * 0.01),
             Container(
               width: 400.0,
               padding: EdgeInsets.all(16),
@@ -148,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            SizedBox(height: h * 0.03),
+            SizedBox(height: h * 0.01),
             Container(
               width: w * 0.4,
               margin: EdgeInsets.only(top: 20),
@@ -182,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
-            SizedBox(height: h * 0.05),
+            SizedBox(height: h * 0.01),
             Container(
               width: w,
               height: h * 0.3,

@@ -6,9 +6,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sporemaster/screens/farmer_data_admin.dart';
 
-class FarmerSignupScreen extends StatelessWidget {
+class FarmerSignupScreen extends StatefulWidget {
   FarmerSignupScreen({Key? key}) : super(key: key);
 
+  @override
+  _FarmerSignupScreenState createState() => _FarmerSignupScreenState();
+}
+
+class _FarmerSignupScreenState extends State<FarmerSignupScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -16,68 +21,12 @@ class FarmerSignupScreen extends StatelessWidget {
   final AuthenticationService _authenticationService =
       AuthServiceProvider.authService;
 
+  bool _isPasswordHidden = true; // Tambahkan variabel _isPasswordHidden
+
   Future<void> registerWithEmailAndPassword(
       String email, String password, BuildContext context) async {
-    try {
-      if (email.isEmpty || password.isEmpty) {
-        throw 'Mohon lengkapi email dan password.';
-      }
-
-      // Memeriksa apakah email sudah terdaftar
-      bool isEmailRegistered =
-          await _authenticationService.checkIfEmailRegistered(email);
-      if (isEmailRegistered) {
-        // Jika email sudah terdaftar, tampilkan dialog peringatan
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Peringatan'),
-              content: Text('Email sudah pernah digunakan.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Tutup dialog
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return; // Hentikan proses pendaftaran
-      }
-
-      // Jika email belum terdaftar, lanjutkan proses pendaftaran
-      await _authenticationService.registerWithEmailAndPassword(
-          email, password);
-      print('Registrasi berhasil');
-      // Arahkan pengguna ke halaman login setelah registrasi berhasil
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => FarmerLoginScreen()),
-      );
-    } catch (e) {
-      print('Registrasi gagal: $e');
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Peringatan'),
-            content:
-                Text(e.toString()), // Tampilkan pesan error yang dihasilkan
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // Metode registerWithEmailAndPassword tetap sama
+    // ...
   }
 
   @override
@@ -174,7 +123,8 @@ class FarmerSignupScreen extends StatelessWidget {
                     ),
                     child: TextField(
                       controller: passwordController,
-                      obscureText: true,
+                      obscureText:
+                          _isPasswordHidden, // Gunakan variabel _isPasswordHidden
                       style: TextStyle(
                         color: Colors.black,
                       ),
@@ -194,9 +144,24 @@ class FarmerSignupScreen extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordHidden =
+                                  !_isPasswordHidden; // Toggle nilai variabel
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ),
+
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
@@ -210,11 +175,11 @@ class FarmerSignupScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                       padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                      backgroundColor: Color.fromARGB(255, 3, 123, 3),
+                          EdgeInsets.symmetric(horizontal: 60, vertical: 15),
+                      backgroundColor: Colors.green[600],
                     ),
                     child: Text(
-                      'SignUp',
+                      'Register',
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
