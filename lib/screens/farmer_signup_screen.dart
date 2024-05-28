@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sporemaster/screens/farmer_login_screen.dart';
 import 'package:sporemaster/services/authentication_service.dart';
-import 'package:sporemaster/services/auth_service_provider.dart'; // Ubah import
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sporemaster/screens/farmer_data_admin.dart';
+import 'package:sporemaster/services/auth_service_provider.dart';
 
 class FarmerSignupScreen extends StatefulWidget {
   FarmerSignupScreen({Key? key}) : super(key: key);
@@ -14,19 +11,270 @@ class FarmerSignupScreen extends StatefulWidget {
 }
 
 class _FarmerSignupScreenState extends State<FarmerSignupScreen> {
+  bool _isPasswordHidden = true; // Variabel untuk mengontrol tampilan password
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // Buat instance AuthenticationService di luar method build
   final AuthenticationService _authenticationService =
       AuthServiceProvider.authService;
 
-  bool _isPasswordHidden = true; // Tambahkan variabel _isPasswordHidden
-
   Future<void> registerWithEmailAndPassword(
       String email, String password, BuildContext context) async {
-    // Metode registerWithEmailAndPassword tetap sama
-    // ...
+    try {
+      if (email.isEmpty || password.isEmpty) {
+        throw 'Mohon lengkapi email dan password.';
+      }
+
+      if (password.length < 6) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  Text(
+                    'Informasi',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  CircleAvatar(
+                    backgroundColor: Colors.orange,
+                    radius: 30,
+                    child: Icon(
+                      Icons.warning_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                'Password yang anda inputkan kurang dari 6 karakter.',
+                textAlign: TextAlign.center,
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                    child: Text(
+                      "OK",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        return;
+      }
+
+      bool isEmailRegistered =
+          await _authenticationService.checkIfEmailRegistered(email);
+      if (isEmailRegistered) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Column(
+                children: [
+                  Text(
+                    'Peringatan',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.red[600],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  CircleAvatar(
+                    backgroundColor: Colors.red[400],
+                    radius: 30,
+                    child: Icon(
+                      Icons.warning_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                'Email sudah pernah digunakan.',
+                textAlign: TextAlign.center,
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red[600],
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                    child: Text(
+                      "OK",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        return;
+      }
+
+      await _authenticationService.registerWithEmailAndPassword(
+          email, password);
+      print('Registrasi berhasil');
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Text(
+                  'Registrasi Berhasil',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.green[600],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                CircleAvatar(
+                  backgroundColor: Colors.green[400],
+                  radius: 30,
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Selamat registrasi anda berhasil',
+                  style: TextStyle(fontSize: 15),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FarmerLoginScreen()),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green[600],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                  child: Text(
+                    "OK",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      print('Registrasi gagal: $e');
+      String errorMessage = '';
+      IconData iconData = Icons.warning_rounded;
+      Color titleColor = Colors.red[600]!;
+      Color buttonColor = Colors.red[600]!;
+
+      if (e.toString().contains('no user')) {
+        errorMessage = 'Email belum terdaftar.';
+      } else if (e.toString().contains('email-already-in-use')) {
+        errorMessage = 'Email sudah pernah digunakan.';
+      } else {
+        errorMessage = 'Mohon lengkapi email dan password.';
+      }
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Text(
+                  'Peringatan',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: titleColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                CircleAvatar(
+                  backgroundColor: Colors.red[400],
+                  radius: 30,
+                  child: Icon(
+                    iconData,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: buttonColor,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                  child: Text(
+                    "OK",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -71,7 +319,6 @@ class _FarmerSignupScreenState extends State<FarmerSignupScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 70),
               child: Column(
                 children: [
-                  // Input fields...
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -90,8 +337,7 @@ class _FarmerSignupScreenState extends State<FarmerSignupScreen> {
                         color: Colors.black,
                       ),
                       decoration: InputDecoration(
-                        prefixIcon:
-                            Icon(Icons.email, color: Colors.grey), // Icon email
+                        prefixIcon: Icon(Icons.email, color: Colors.grey),
                         hintText: 'Email',
                         hintStyle: TextStyle(color: Colors.grey),
                         focusedBorder: OutlineInputBorder(
@@ -123,14 +369,12 @@ class _FarmerSignupScreenState extends State<FarmerSignupScreen> {
                     ),
                     child: TextField(
                       controller: passwordController,
-                      obscureText:
-                          _isPasswordHidden, // Gunakan variabel _isPasswordHidden
+                      obscureText: _isPasswordHidden,
                       style: TextStyle(
                         color: Colors.black,
                       ),
                       decoration: InputDecoration(
-                        prefixIcon:
-                            Icon(Icons.lock, color: Colors.grey), // Icon gembok
+                        prefixIcon: Icon(Icons.lock, color: Colors.grey),
                         hintText: 'Password',
                         hintStyle: TextStyle(color: Colors.grey),
                         focusedBorder: OutlineInputBorder(
@@ -153,15 +397,13 @@ class _FarmerSignupScreenState extends State<FarmerSignupScreen> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _isPasswordHidden =
-                                  !_isPasswordHidden; // Toggle nilai variabel
+                              _isPasswordHidden = !_isPasswordHidden;
                             });
                           },
                         ),
                       ),
                     ),
                   ),
-
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {

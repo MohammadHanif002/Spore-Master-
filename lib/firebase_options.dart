@@ -44,22 +44,24 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBhL5RnU_VjRiBAKkndPzR9ZAp3vBBDpQM',
-    appId: '1:302661394551:web:bda578e7a5092782012672',
-    messagingSenderId: '302661394551',
-    projectId: 'sporebase-4a15a',
-    authDomain: 'sporebase-4a15a.firebaseapp.com',
-    storageBucket: 'sporebase-4a15a.appspot.com',
-    measurementId: 'G-X3LX7DC6W2',
-  );
+      apiKey: 'AIzaSyBhL5RnU_VjRiBAKkndPzR9ZAp3vBBDpQM',
+      appId: '1:302661394551:web:bda578e7a5092782012672',
+      messagingSenderId: '302661394551',
+      projectId: 'sporebase-4a15a',
+      authDomain: 'sporebase-4a15a.firebaseapp.com',
+      storageBucket: 'sporebase-4a15a.appspot.com',
+      measurementId: 'G-X3LX7DC6W2',
+      databaseURL:
+          'https://sporebase-4a15a-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAVFLG6dpTkzjhVH-LXaBt_gJXBYHyqiEs',
-    appId: '1:302661394551:android:7d0b61a9e352bda3012672',
-    messagingSenderId: '302661394551',
-    projectId: 'sporebase-4a15a',
-    storageBucket: 'sporebase-4a15a.appspot.com',
-  );
+      apiKey: 'AIzaSyAVFLG6dpTkzjhVH-LXaBt_gJXBYHyqiEs',
+      appId: '1:302661394551:android:7d0b61a9e352bda3012672',
+      messagingSenderId: '302661394551',
+      projectId: 'sporebase-4a15a',
+      storageBucket: 'sporebase-4a15a.appspot.com',
+      databaseURL:
+          'https://sporebase-4a15a-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBFfZAfvIU0Osn7yx-OWCtZHomR5W5m-s8',

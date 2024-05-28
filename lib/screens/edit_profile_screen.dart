@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:sporemaster/screens/profile_screen.dart';
+import 'package:sporemaster/screens/home_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   EditProfileScreen({Key? key}) : super(key: key);
@@ -21,20 +21,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController postalCodeController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController genderController = TextEditingController();
-  late File _image; // Menggunakan File dari dart:io
+  File? _image; // Menggunakan File dari dart:io
 
   @override
   void initState() {
     super.initState();
-    _image = File(''); // Menginisialisasi _image dengan nilai kosong
-    // Inisialisasi nilai awal untuk setiap TextField jika diperlukan
-    emailController.text = ''; // Isi dengan nilai awal
-    phoneController.text = ''; // Isi dengan nilai awal
-    addressController.text = ''; // Isi dengan nilai awal
-    cityController.text = ''; // Isi dengan nilai awal
-    postalCodeController.text = ''; // Isi dengan nilai awal
-    ageController.text = ''; // Isi dengan nilai awal
-    genderController.text = ''; // Isi dengan nilai awal
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      DocumentSnapshot userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (userData.exists) {
+        setState(() {
+          emailController.text = userData['email'] ?? '';
+          phoneController.text = userData['phone'] ?? '';
+          addressController.text = userData['address'] ?? '';
+          cityController.text = userData['city'] ?? '';
+          postalCodeController.text = userData['postalCode'] ?? '';
+          ageController.text = userData['age']?.toString() ?? '';
+          genderController.text = userData['gender'] ?? '';
+        });
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -71,23 +84,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _handleSaveButtonPressed() async {
-    // Tambahkan pengecekan jika gambar belum dipilih
-    if (_image.path.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Harap pilih gambar terlebih dahulu')),
-      );
-      return;
+    String imageUrl = '';
+    if (_image != null) {
+      imageUrl = await uploadImageToFirebaseStorage(_image!);
     }
-
-    // Upload gambar ke Firebase Storage dan dapatkan URL gambar
-    String imageUrl = await uploadImageToFirebaseStorage(_image);
-
-    // Panggil metode untuk menyimpan data ke Firestore dengan URL gambar
     await _saveDataToFirestore(imageUrl);
   }
 
   Future<void> _saveDataToFirestore(String imageUrl) async {
-    // Mendapatkan nilai input dari pengguna
     String email = emailController.text;
     String phone = phoneController.text;
     String address = addressController.text;
@@ -97,62 +101,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     String gender = genderController.text;
 
     try {
-      // Mendapatkan ID pengguna saat ini
       String? userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
-        // Memeriksa apakah dokumen pengguna sudah ada
-        bool userExists = (await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .get())
-            .exists;
+        DocumentReference userDoc =
+            FirebaseFirestore.instance.collection('users').doc(userId);
+        await userDoc.set({
+          'email': email,
+          'phone': phone,
+          'address': address,
+          'city': city,
+          'postalCode': postalCode,
+          'age': age,
+          'gender': gender,
+          if (imageUrl.isNotEmpty) 'profileImage': imageUrl,
+        }, SetOptions(merge: true));
 
-        // Memperbarui data pengguna jika dokumen sudah ada, jika tidak, tambahkan dokumen baru
-        if (userExists) {
-          // Memperbarui data pengguna yang ada di Firestore
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userId)
-              .update({
-            'email': email,
-            'phone': phone,
-            'address': address,
-            'city': city,
-            'postalCode': postalCode,
-            'age': age,
-            'gender': gender,
-            'profileImage': imageUrl, // Simpan URL gambar ke Firestore
-          });
-        } else {
-          // Menambahkan dokumen baru ke Firestore
-          await FirebaseFirestore.instance.collection('users').doc(userId).set({
-            'email': email,
-            'phone': phone,
-            'address': address,
-            'city': city,
-            'postalCode': postalCode,
-            'age': age,
-            'gender': gender,
-            'profileImage': imageUrl, // Simpan URL gambar ke Firestore
-          });
-        }
-
-        // Menampilkan pesan berhasil jika penyimpanan berhasil
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Data berhasil disimpan di Firestore')),
-        );
-
-        // Mengarahkan pengguna ke halaman ProfileScreen setelah menyimpan perubahan
+            SnackBar(content: Text('Data berhasil disimpan di Firestore')));
         Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ProfileScreen()),
-        );
+            context, MaterialPageRoute(builder: (context) => HomeScreen()));
       }
     } catch (error) {
-      // Menampilkan pesan kesalahan jika penyimpanan gagal
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $error')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $error')));
     }
   }
 
@@ -203,9 +174,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: CircleAvatar(
                     radius: w * 0.15,
                     backgroundColor: Colors.grey[300],
-                    backgroundImage:
-                        _image.path.isNotEmpty ? FileImage(_image) : null,
-                    child: _image.path.isEmpty
+                    backgroundImage: _image != null ? FileImage(_image!) : null,
+                    child: _image == null
                         ? Icon(Icons.camera_alt, size: w * 0.1)
                         : null,
                   ),

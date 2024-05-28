@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sporemaster/models/monthly_report_model.dart';
 
 class JanuariScreen extends StatelessWidget {
   @override
@@ -6,55 +8,58 @@ class JanuariScreen extends StatelessWidget {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize:
-            Size.fromHeight(40.0), // Sesuaikan tinggi AppBar sesuai kebutuhan
-        child: AppBar(
-          title: Text('Januari'),
-          backgroundColor: Color.fromRGBO(255, 135, 9, 1),
-          // Ubah warna latar belakang AppBar sesuai keinginan Anda
+    return ChangeNotifierProvider<MonthlyReport>(
+      create: (context) => MonthlyReport()..fetchData('2024-01'),
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(40.0),
+          child: AppBar(
+            title: Text('Januari'),
+            backgroundColor: Color.fromRGBO(255, 135, 9, 1),
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(left: 0, right: 0),
-              width: w,
-              height: h * 0.3,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                    "assets/images/top_background.jpeg",
+        body: Consumer<MonthlyReport>(
+          builder: (context, report, child) {
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(left: 0, right: 0),
+                    width: w,
+                    height: h * 0.3,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("assets/images/top_background.jpeg"),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            InfoBox(
-              title: 'Januari',
-              temperature: '25°C',
-              humidity: '60%',
-              wateringCount: '10 kali',
-              boxWidth: w * 0.8,
-              boxHeight: 220,
-            ),
-            SizedBox(height: 20),
-            Container(
-              margin: const EdgeInsets.only(left: 0, right: 0),
-              width: w,
-              height: h * 0.3,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                    "assets/images/bottom_background.jpeg",
+                  InfoBox(
+                    title: 'Januari',
+                    temperature:
+                        '${report.averageTemperature.toStringAsFixed(2)}°C',
+                    humidity: '${report.averageHumidity.toStringAsFixed(2)}%',
+                    wateringCount: '${report.wateringCount} kali',
+                    boxWidth: w * 0.8,
+                    boxHeight: 220,
                   ),
-                  fit: BoxFit.cover,
-                ),
+                  SizedBox(height: 20),
+                  Container(
+                    margin: const EdgeInsets.only(left: 0, right: 0),
+                    width: w,
+                    height: h * 0.3,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image:
+                            AssetImage("assets/images/bottom_background.jpeg"),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
